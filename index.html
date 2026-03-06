@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Finance Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --blue-start: #3b82f6;
+    --blue-mid: #2563eb;
+    --teal: #06b6d4;
+    --teal-light: #67e8f9;
+    --bg: #f0f4ff;
+    --card: #ffffff;
+    --text: #1e293b;
+    --muted: #64748b;
+    --deposit: #3b82f6;
+    --withdraw: #f43f5e;
+    --border: #e2e8f0;
+    --shadow: 0 4px 24px rgba(37,99,235,0.10);
+  }
+
+  body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* LAYOUT */
+  .app {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    min-height: 100vh;
+  }
+
+  /* SIDEBAR */
+  .sidebar {
+    background: linear-gradient(160deg, #1d4ed8 0%, #0891b2 100%);
+    padding: 32px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+  }
+
+  .sidebar-logo {
+    color: #fff;
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    padding: 0 8px 24px;
+    border-bottom: 1px solid rgba(255,255,255,0.15);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .sidebar-logo .logo-icon {
+    width: 36px; height: 36px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 10px;
+    display: grid; place-items: center;
+    font-size: 18px;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 12px;
+    border-radius: 12px;
+    color: rgba(255,255,255,0.7);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all .2s;
+    text-decoration: none;
+  }
+
+  .nav-item:hover, .nav-item.active {
+    background: rgba(255,255,255,0.15);
+    color: #fff;
+  }
+
+  .nav-item.active { background: rgba(255,255,255,0.22); }
+  .nav-icon { font-size: 18px; width: 22px; text-align: center; }
+
+  .sidebar-bottom {
+    margin-top: auto;
+    border-top: 1px solid rgba(255,255,255,0.15);
+    padding-top: 20px;
+  }
+
+  .user-card {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.12);
+  }
+
+  .user-avatar {
+    width: 38px; height: 38px; border-radius: 50%;
+    background: linear-gradient(135deg, #7dd3fc, #a5f3fc);
+    display: grid; place-items: center;
+    font-weight: 700; font-size: 15px; color: #1d4ed8;
+    flex-shrink: 0;
+  }
+
+  .user-info .name { color: #fff; font-size: 13px; font-weight: 700; }
+  .user-info .role { color: rgba(255,255,255,0.6); font-size: 11px; }
+
+  /* MAIN */
+  .main {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
+  /* TOPBAR */
+  .topbar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 20px 32px;
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+    position: sticky; top: 0; z-index: 10;
+  }
+
+  .topbar-left h1 { font-size: 18px; font-weight: 700; color: var(--text); }
+  .topbar-left p { font-size: 13px; color: var(--muted); margin-top: 1px; }
+
+  .topbar-right { display: flex; align-items: center; gap: 12px; }
+
+  .icon-btn {
+    width: 38px; height: 38px; border-radius: 10px;
+    background: var(--bg); border: 1px solid var(--border);
+    display: grid; place-items: center; cursor: pointer; font-size: 17px;
+    transition: background .15s;
+  }
+  .icon-btn:hover { background: #dbeafe; }
+
+  .avatar-top {
+    width: 38px; height: 38px; border-radius: 50%;
+    background: linear-gradient(135deg, #3b82f6, #06b6d4);
+    display: grid; place-items: center;
+    color: #fff; font-weight: 700; font-size: 14px; cursor: pointer;
+  }
+
+  /* CONTENT */
+  .content {
+    padding: 28px 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+    flex: 1;
+  }
+
+  /* HERO CARD */
+  .hero-card {
+    background: linear-gradient(135deg, #1d4ed8 0%, #0891b2 100%);
+    border-radius: 24px;
+    padding: 32px 36px;
+    color: #fff;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    position: relative;
+    overflow: hidden;
+    min-height: 160px;
+    box-shadow: 0 12px 40px rgba(29,78,216,0.35);
+  }
+
+  .hero-card::before {
+    content: '';
+    position: absolute; top: -60px; right: -60px;
+    width: 220px; height: 220px;
+    background: rgba(255,255,255,0.07);
+    border-radius: 50%;
+  }
+  .hero-card::after {
+    content: '';
+    position: absolute; bottom: -80px; right: 80px;
+    width: 180px; height: 180px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 50%;
+  }
+
+  .hero-left .label {
+    font-size: 13px; opacity: .75; font-weight: 500; margin-bottom: 6px;
+  }
+  .hero-left .balance {
+    font-size: 36px; font-weight: 800; letter-spacing: -1px; line-height: 1;
+  }
+  .hero-left .date {
+    font-size: 13px; opacity: .65; margin-top: 8px;
+    display: flex;
+    align-items: center;
+    gap: .4rem;
+  }
+
+  .hero-right {
+    display: flex; gap: 16px; z-index: 1;
+  }
+
+  .hero-action {
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+    cursor: pointer;
+  }
+  .hero-action .circle {
+    width: 48px; height: 48px; border-radius: 50%;
+    background: rgba(255,255,255,0.2);
+    display: grid; place-items: center;
+    font-size: 20px;
+    transition: background .2s;
+    border: 1.5px solid rgba(255,255,255,0.3);
+  }
+  .hero-action:hover .circle { background: rgba(255,255,255,0.32); }
+  .hero-action span { font-size: 11px; opacity: .8; font-weight: 500; }
+
+  /* STATS ROW */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+
+  .stat-card {
+    background: var(--card);
+    border-radius: 18px;
+    padding: 20px 22px;
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+    display: flex; flex-direction: column; gap: 6px;
+    transition: transform .2s, box-shadow .2s;
+  }
+  .stat-card:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(37,99,235,0.13); }
+
+  .stat-top {
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .stat-icon {
+    width: 38px; height: 38px; border-radius: 10px;
+    display: grid; place-items: center; font-size: 18px;
+  }
+  .stat-icon.blue { background: #dbeafe; }
+  .stat-icon.green { background: #dcfce7; }
+  .stat-icon.red { background: #ffe4e6; }
+
+  .stat-badge {
+    font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 20px;
+  }
+  .stat-badge.up { background: #dcfce7; color: #16a34a; }
+  .stat-badge.down { background: #ffe4e6; color: #dc2626; }
+
+  .stat-value { font-size: 22px; font-weight: 800; color: var(--text); letter-spacing: -0.5px; }
+  .stat-label { font-size: 12px; color: var(--muted); font-weight: 500; }
+
+  /* GRID BOTTOM */
+  .grid-bottom {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 20px;
+  }
+
+  /* CHART CARD */
+  .chart-card {
+    background: var(--card);
+    border-radius: 20px;
+    padding: 24px 24px 16px;
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+  }
+
+  .card-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 20px;
+  }
+  .card-title { font-size: 16px; font-weight: 700; }
+  .see-all {
+    font-size: 13px; color: var(--blue-start); font-weight: 600; cursor: pointer;
+    text-decoration: none;
+  }
+
+  .chart-wrap { position: relative; height: 180px; }
+  canvas { width: 100% !important; }
+
+  .chart-labels {
+    display: flex; justify-content: space-between;
+    padding: 8px 4px 0;
+  }
+  .chart-labels span { font-size: 11px; color: var(--muted); font-weight: 500; }
+  .chart-labels span.active { color: var(--blue-start); font-weight: 700; }
+
+  /* HISTORY CARD */
+  .history-card {
+    background: var(--card);
+    border-radius: 20px;
+    padding: 24px;
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+    display: flex; flex-direction: column; gap: 14px;
+  }
+
+  .tx-item {
+    display: flex; align-items: center; gap: 14px;
+    padding: 12px 14px;
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    transition: background .15s;
+    cursor: pointer;
+  }
+  .tx-item:hover { background: #f8faff; }
+
+  .tx-icon {
+    width: 40px; height: 40px; border-radius: 50%;
+    display: grid; place-items: center; font-size: 18px;
+    flex-shrink: 0;
+  }
+  .tx-icon.dep { background: #dbeafe; }
+  .tx-icon.wit { background: #ffe4e6; }
+
+  .tx-info { flex: 1; min-width: 0; }
+  .tx-name { font-size: 13px; font-weight: 700; color: var(--text); }
+  .tx-loc { 
+    font-size: 11px; color: var(--muted); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; 
+    display: flex;
+    align-items: center;
+    gap: 0.2rem;
+}
+
+  .tx-amount { text-align: right; flex-shrink: 0; }
+  .tx-amount .val { font-size: 13px; font-weight: 700; }
+  .tx-amount .val.dep { color: var(--deposit); }
+  .tx-amount .val.wit { color: var(--withdraw); }
+  .tx-amount .time { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  /* VISA CARD */
+  .visa-section { display: flex; flex-direction: column; gap: 14px; }
+
+  .visa-card {
+    background: linear-gradient(135deg, #1d4ed8 0%, #0891b2 100%);
+    border-radius: 18px;
+    padding: 22px 22px 18px;
+    color: #fff;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 8px 28px rgba(29,78,216,0.3);
+  }
+  .visa-card::before {
+    content: ''; position: absolute;
+    top: -40px; right: -40px;
+    width: 130px; height: 130px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 50%;
+  }
+  .visa-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+  .chip { font-size: 26px; }
+  .premium-badge {
+    font-size: 10px; font-weight: 700; letter-spacing: 1px;
+    background: rgba(255,255,255,0.2); padding: 4px 10px; border-radius: 20px;
+  }
+  .card-number { font-size: 14px; letter-spacing: 2px; font-weight: 600; margin-bottom: 14px; opacity: .9; }
+  .card-footer { display: flex; justify-content: space-between; align-items: center; }
+  .card-name { font-size: 13px; font-weight: 700; }
+  .visa-logo { font-size: 20px; font-weight: 900; font-style: italic; letter-spacing: -1px; }
+
+  /* SERVICES */
+  .services-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;
+  }
+
+  .service-btn {
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+    padding: 14px 8px;
+    background: var(--bg);
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: all .2s;
+  }
+  .service-btn:hover { background: #dbeafe; border-color: #bfdbfe; }
+  .service-icon { font-size: 20px; }
+  .service-label { font-size: 11px; font-weight: 600; color: var(--muted); }
+
+  /* MOBILE NAV */
+  .mobile-nav {
+    display: none;
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: var(--card);
+    border-top: 1px solid var(--border);
+    padding: 10px 0 14px;
+    z-index: 100;
+  }
+  .mobile-nav-inner {
+    display: flex; justify-content: space-around;
+  }
+  .mob-nav-item {
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+    cursor: pointer; padding: 4px 10px;
+  }
+  .mob-nav-item .icon { font-size: 22px; color: var(--muted); }
+  .mob-nav-item .label { font-size: 10px; color: var(--muted); font-weight: 600; }
+  .mob-nav-item.active .icon, .mob-nav-item.active .label { color: var(--blue-start); }
+
+  /* HAMBURGER */
+  .hamburger { display: none; }
+
+  /* RESPONSIVE */
+  @media (max-width: 900px) {
+    .app { grid-template-columns: 1fr; }
+    .sidebar { display: none; }
+    .mobile-nav { display: block; }
+    .topbar { padding: 14px 18px; }
+    .hamburger { display: grid; place-items: center; }
+    .content { padding: 18px 16px 90px; gap: 18px; }
+    .stats-row { grid-template-columns: repeat(2, 1fr); }
+    .grid-bottom { grid-template-columns: 1fr; }
+    .hero-card { padding: 22px 22px; min-height: 140px; }
+    .hero-left .balance { font-size: 26px; }
+  }
+
+  @media (max-width: 480px) {
+    .stats-row { grid-template-columns: 1fr 1fr; }
+    .hero-right { gap: 10px; }
+    .hero-action .circle { width: 40px; height: 40px; font-size: 17px; }
+  }
+
+  /* ANIMATION */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(18px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .hero-card, .stats-row, .grid-bottom, .visa-section {
+    animation: fadeUp .4s ease both;
+  }
+  .stats-row { animation-delay: .08s; }
+  .grid-bottom { animation-delay: .15s; }
+</style>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+</head>
+<body>
+
+<div class="app">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon"><i class="fa-solid fa-credit-card"></i></div>
+      FinanceApp
+    </div>
+    <a class="nav-item active" href="#"><span class="nav-icon"><i class="fa-solid fa-house"></i></span> Dashboard</a>
+    <a class="nav-item" href="#"><span class="nav-icon"><i class="fa-solid fa-chart-simple"></i></span> Statistics</a>
+    <a class="nav-item" href="#"><span class="nav-icon"><i class="fa-solid fa-money-bill-transfer"></i></span> Transactions</a>
+    <a class="nav-item" href="#"><span class="nav-icon"><i class="fa-solid fa-credit-card"></i></span> Cards</a>
+    <a class="nav-item" href="#"><span class="nav-icon"><i class="fa-solid fa-money-bill-wave"></i></span> Finance</a>
+    <a class="nav-item" href="#"><span class="nav-icon"><i class="fa-regular fa-circle-up"></i></span> Top Up</a>
+    <a class="nav-item" href="#"><span class="nav-icon"><i class="fa-solid fa-gear"></i></span> Settings</a>
+    <a class="nav-item" href="#"><span class="nav-icon"><i class="fa-solid fa-question"></i></span> Help</a>
+    <div class="sidebar-bottom">
+      <div class="user-card">
+        <div class="user-avatar">A</div>
+        <div class="user-info">
+          <div class="name">Aurellia</div>
+          <div class="role">Premium Member</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main">
+    <!-- TOPBAR -->
+    <div class="topbar">
+      <div class="topbar-left">
+        <h1>Hello, Aurellia! 👋</h1>
+        <p>6 Maret 2026 — Welcome back</p>
+      </div>
+      <div class="topbar-right">
+        <div class="icon-btn hamburger"><i class="fa-solid fa-bars"></i></div>
+        <div class="icon-btn"><i class="fa-solid fa-bell"></i></div>
+        <div class="icon-btn"><i class="fa-solid fa-magnifying-glass"></i></div>
+        <div class="avatar-top">A</div>
+      </div>
+    </div>
+
+    <!-- CONTENT -->
+    <div class="content">
+
+      <!-- HERO -->
+      <div class="hero-card">
+        <div class="hero-left">
+          <div class="label">Total Balance</div>
+          <div class="balance">Rp 25.550.000,-</div>
+          <div class="date"><i class="fa-solid fa-calendar"></i> 6 Maret 2026</div>
+        </div>
+        <div class="hero-right">
+          <div class="hero-action">
+            <div class="circle"><i class="fa-solid fa-circle-down"></i></div>
+            <span>Deposit</span>
+          </div>
+          <div class="hero-action">
+            <div class="circle"><i class="fa-solid fa-circle-up"></i></div>
+            <span>Transfer</span>
+          </div>
+          <div class="hero-action">
+            <div class="circle"><i class="fa-solid fa-credit-card"></i></div>
+            <span>Pay</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- STATS -->
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-top">
+            <div class="stat-icon blue"><i class="fa-solid fa-arrow-trend-up"></i></div>
+            <span class="stat-badge up">+12%</span>
+          </div>
+          <div class="stat-value">Rp 15.5M</div>
+          <div class="stat-label">Total Deposit</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-top">
+            <div class="stat-icon red"><i class="fa-solid fa-arrow-trend-down"></i></div>
+            <span class="stat-badge down">-8%</span>
+          </div>
+          <div class="stat-value">Rp 8.2M</div>
+          <div class="stat-label">Total Withdraw</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-top">
+            <div class="stat-icon green"><i class="fa-regular fa-money-bill-1"></i></div>
+            <span class="stat-badge up">+5%</span>
+          </div>
+          <div class="stat-value">Rp 4.8M</div>
+          <div class="stat-label">Net Savings</div>
+        </div>
+      </div>
+
+      <!-- BOTTOM GRID -->
+      <div class="grid-bottom">
+
+        <!-- CHART + HISTORY -->
+        <div style="display:flex;flex-direction:column;gap:20px;">
+          <div class="chart-card">
+            <div class="card-header">
+              <span class="card-title">Statistics</span>
+              <a class="see-all" href="#">See All</a>
+            </div>
+            <div class="chart-wrap">
+              <canvas id="myChart"></canvas>
+            </div>
+            <div class="chart-labels">
+              <span>Jan</span>
+              <span>Feb</span>
+              <span class="active">Mar</span>
+              <span>Apr</span>
+              <span>May</span>
+            </div>
+          </div>
+
+          <div class="history-card">
+            <div class="card-header">
+              <span class="card-title">Transaction History</span>
+              <a class="see-all" href="#">See All</a>
+            </div>
+
+            <div class="tx-item">
+              <div class="tx-icon dep"><i class="fa-solid fa-arrow-trend-up"></i></div>
+              <div class="tx-info">
+                <div class="tx-name">Deposit</div>
+                <div class="tx-loc"><i class="fa-solid fa-location-dot"></i> Bank Mandiri ATM</div>
+              </div>
+              <div class="tx-amount">
+                <div class="val dep">+Rp15.510.000</div>
+                <div class="time">11 Mar · 11:21 AM</div>
+              </div>
+            </div>
+
+            <div class="tx-item">
+              <div class="tx-icon wit"><i class="fa-solid fa-arrow-trend-down"></i></div>
+              <div class="tx-info">
+                <div class="tx-name">Withdraw</div>
+                <div class="tx-loc"><i class="fa-solid fa-location-dot"></i> Bank Mandiri ATM</div>
+              </div>
+              <div class="tx-amount">
+                <div class="val wit">-Rp15.510.000</div>
+                <div class="time">11 Mar · 11:22 AM</div>
+              </div>
+            </div>
+
+            <div class="tx-item">
+              <div class="tx-icon dep"><i class="fa-solid fa-arrow-trend-up"></i></div>
+              <div class="tx-info">
+                <div class="tx-name">Deposit</div>
+                <div class="tx-loc"><i class="fa-solid fa-location-dot"></i> BCA ATM Malang</div>
+              </div>
+              <div class="tx-amount">
+                <div class="val dep">+Rp8.200.000</div>
+                <div class="time">10 Mar · 09:15 AM</div>
+              </div>
+            </div>
+
+            <div class="tx-item">
+              <div class="tx-icon wit"><i class="fa-solid fa-arrow-trend-down"></i></div>
+              <div class="tx-info">
+                <div class="tx-name">Transfer</div>
+                <div class="tx-loc"><i class="fa-solid fa-location-dot"></i> Mobile Banking</div>
+              </div>
+              <div class="tx-amount">
+                <div class="val wit">-Rp3.000.000</div>
+                <div class="time">09 Mar · 02:44 PM</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT COL -->
+        <div style="display:flex;flex-direction:column;gap:20px;">
+          <!-- VISA -->
+          <div class="chart-card">
+            <div class="card-header">
+              <span class="card-title">Your Visa</span>
+              <a class="see-all" href="#">See All</a>
+            </div>
+            <div class="visa-card">
+              <div class="visa-top">
+                <div class="chip"><i class="fa-solid fa-sim-card"></i></div>
+                <div class="premium-badge">PREMIUM</div>
+              </div>
+              <div class="card-number">4000  5127  2123  2018</div>
+              <div class="card-footer">
+                <div class="card-name">Aurellia</div>
+                <div class="visa-logo">VISA</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SERVICES -->
+          <div class="chart-card">
+            <div class="card-header">
+              <span class="card-title">Services</span>
+              <a class="see-all" href="#">See All</a>
+            </div>
+            <div class="services-grid">
+              <div class="service-btn">
+                <div class="service-icon"><i class="fa-solid fa-credit-card"></i></div>
+                <div class="service-label">Card</div>
+              </div>
+              <div class="service-btn">
+                <div class="service-icon"><i class="fa-solid fa-money-bill-1"></i></div>
+                <div class="service-label">Finance</div>
+              </div>
+              <div class="service-btn">
+                <div class="service-icon"><i class="fa-solid fa-circle-up"></i></div>
+                <div class="service-label">Top Up</div>
+              </div>
+              <div class="service-btn">
+                <div class="service-icon"><i class="fa-solid fa-question"></i></div>
+                <div class="service-label">Help</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- QUICK STATS -->
+          <div class="chart-card">
+            <div class="card-header">
+              <span class="card-title">Quick Overview</span>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:12px;">
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:#f0f4ff;border-radius:12px;">
+                <span style="font-size:13px;color:var(--muted);font-weight:500;">Active Cards</span>
+                <span style="font-size:14px;font-weight:800;color:var(--blue-start);">2</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:#f0fdf4;border-radius:12px;">
+                <span style="font-size:13px;color:var(--muted);font-weight:500;">This Month Income</span>
+                <span style="font-size:14px;font-weight:800;color:#16a34a;">+Rp 23.7M</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:#fff1f2;border-radius:12px;">
+                <span style="font-size:13px;color:var(--muted);font-weight:500;">This Month Spend</span>
+                <span style="font-size:14px;font-weight:800;color:#dc2626;">-Rp 18.7M</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div><!-- /content -->
+  </div><!-- /main -->
+</div>
+
+<!-- MOBILE NAV -->
+<nav class="mobile-nav">
+  <div class="mobile-nav-inner">
+    <div class="mob-nav-item active">
+      <div class="icon"><i class="fa-solid fa-house"></i></div>
+      <div class="label">Home</div>
+    </div>
+    <div class="mob-nav-item">
+      <div class="icon"><i class="fa-solid fa-clock-rotate-left"></i></div>
+      <div class="label">History</div>
+    </div>
+    <div class="mob-nav-item">
+      <div class="icon"><i class="fa-regular fa-comment"></i></div>
+      <div class="label">Chat</div>
+    </div>
+    <div class="mob-nav-item">
+      <div class="icon"><i class="fa-solid fa-circle-user"></i></div>
+      <div class="label">Profile</div>
+    </div>
+  </div>
+</nav>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<script>
+  const ctx = document.getElementById('myChart').getContext('2d');
+
+  const gradient = ctx.createLinearGradient(0, 0, 0, 180);
+  gradient.addColorStop(0, 'rgba(59,130,246,0.25)');
+  gradient.addColorStop(1, 'rgba(59,130,246,0.0)');
+
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: ['Jan','Feb','Mar','Apr','May'],
+      datasets: [{
+        data: [3.2, 4.8, 3.0, 4.2, 2.2],
+        borderColor: '#3b82f6',
+        borderWidth: 2.5,
+        backgroundColor: gradient,
+        fill: true,
+        tension: 0.45,
+        pointBackgroundColor: '#3b82f6',
+        pointBorderColor: '#fff',
+        pointBorderWidth: 2,
+        pointRadius: 5,
+        pointHoverRadius: 7,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: {
+        backgroundColor: '#1e293b',
+        titleColor: '#94a3b8',
+        bodyColor: '#fff',
+        padding: 10,
+        cornerRadius: 10,
+        callbacks: {
+          label: ctx => ` Rp ${ctx.parsed.y}M`
+        }
+      }},
+      scales: {
+        x: { display: false },
+        y: {
+          display: true,
+          min: 1, max: 6,
+          ticks: {
+            callback: v => v + 'M',
+            font: { size: 10 },
+            color: '#94a3b8',
+            stepSize: 1
+          },
+          grid: { color: '#f1f5f9' },
+          border: { display: false }
+        }
+      }
+    }
+  });
+
+  // Mobile nav interaction
+  document.querySelectorAll('.mob-nav-item').forEach(item => {
+    item.addEventListener('click', () => {
+      document.querySelectorAll('.mob-nav-item').forEach(i => i.classList.remove('active'));
+      item.classList.add('active');
+    });
+  });
+
+  // Sidebar nav interaction
+  document.querySelectorAll('.nav-item').forEach(item => {
+    item.addEventListener('click', e => {
+      e.preventDefault();
+      document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+      item.classList.add('active');
+    });
+  });
+</script>
+</body>
+</html>
